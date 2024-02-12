@@ -1,8 +1,11 @@
 exports.newOpenStorageUtilitiesStorageFactory = {
-    createStorageClient: function createStorageClient(params) {
-    }
+    createStorageClient: createStorageClient
 }
 
+/**
+ * @param {string} containerType
+ *
+ */
 function createStorageClient(containerType) {
     switch (containerType) {
         case 'Github Storage Container': {
