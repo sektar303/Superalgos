@@ -6,6 +6,11 @@ exports.newOpenStorageUtilitiesAWSS3Storage = function newOpenStorageUtilitiesAW
         removeFile: removeFile
     }
 
+    /** 
+     * @type {import { S3Client } from "@aws-sdk/client-s3";} 
+     */
+    let _client = undefined;
+
     return thisObject
 
     async function saveFile(fileName, filePath, fileContent, storageContainer) {
@@ -16,7 +21,7 @@ exports.newOpenStorageUtilitiesAWSS3Storage = function newOpenStorageUtilitiesAW
             return
         }
 
-        const s3Client = setupClient(secret, storageContainer)
+        const s3Client = getClient(secret, storageContainer)
         const { PutObjectCommand } = SA.nodeModules.awsS3
         let key = filePath + '/' + fileName + '.json'
         if(storageContainer.config.pathPrefix !== undefined && storageContainer.config.pathPrefix.length > 0) {
@@ -62,7 +67,7 @@ exports.newOpenStorageUtilitiesAWSS3Storage = function newOpenStorageUtilitiesAW
     }
 
     async function removeFile(fileName, filePath, storageContainer) {       
-        /**@type {ApiSecret} */
+        /** @type {ApiSecret} */
         const secret = SA.secrets.apisSecrets.map.get(storageContainer.config.codeName);
         if (secret === undefined) {
             SA.logger.warn('Secret is undefined');
@@ -70,7 +75,7 @@ exports.newOpenStorageUtilitiesAWSS3Storage = function newOpenStorageUtilitiesAW
             return;
         }
 
-        const s3Client = setupClient(secret, storageContainer)
+        const s3Client = getClient(secret, storageContainer)
         const { DeleteObjectCommand } = SA.nodeModules.awsS3
         let key = filePath + '/' + fileName + '.json'
         if(storageContainer.config.pathPrefix !== undefined && storageContainer.config.pathPrefix.length > 0) {
@@ -99,22 +104,25 @@ exports.newOpenStorageUtilitiesAWSS3Storage = function newOpenStorageUtilitiesAW
      * 
      * @param {ApiSecret} secret 
      * @param {StorageContainer} storageContainer 
-     * @returns {import { S3Client } from "@aws-sdk/client-s3";}
+     * @returns {import {S3Client} from "@aws-sdk/client-s3";}
      */
-    function setupClient(secret, storageContainer) {
-        const options = {};
-        if(secret.accessKeyId && secret.secretAccessKey) {
-            options.accessKeyId = secret.accessKeyId
-            options.secretAccessKey = secret.secretAccessKey
+    function getClient(secret, storageContainer) {
+        if(_client === undefined) {
+            const options = {};
+            if(secret.accessKeyId && secret.secretAccessKey) {
+                options.accessKeyId = secret.accessKeyId
+                options.secretAccessKey = secret.secretAccessKey
+            }
+            if(secret.region) {
+                options.region = secret.region
+            }
+            if(storageContainer.config.bucketRegion !== undefined && storageContainer.config.bucketRegion.length > 0) {
+                options.region = storageContainer.config.bucketRegion
+            }
+            const { S3Client } = SA.nodeModules.awsS3
+            _client = new S3Client(options)
         }
-        if(secret.region) {
-            options.region = secret.region
-        }
-        if(storageContainer.config.bucketRegion !== undefined && storageContainer.config.bucketRegion.length > 0) {
-            options.region = storageContainer.config.bucketRegion
-        }
-        const { S3Client } = SA.nodeModules.awsS3
-        return new S3Client(options);
+        return _client
     }
 }
 
