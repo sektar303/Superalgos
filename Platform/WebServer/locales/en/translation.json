@@ -92,6 +92,8 @@
         "missingReferences": "Fix Missing References"
     },
     "add": {
+        "awsAPI": "Add AWS API",
+        "awsS3Storage": "Add AWS S3 Storage",
         "awsS3StorageContainer": "Add AWS S3 Storage Container",
         "takePositionSignal": "Add Take Position Signal",
         "triggerOffSignal": "Add Trigger Off Signal",
