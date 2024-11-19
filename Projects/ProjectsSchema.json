@@ -2686,5 +2686,23 @@
                 }
             ]
         }
+    },
+    {
+        "name": "Dashboards",
+        "propertyName": "dashboards",
+        "UI": {
+            "nodeActionFunctions": [],
+            "systemActionFunctions": [],
+            "functionLibraries": [],
+            "utilities": []
+        },
+        "DS": {
+        "modules": [],
+            "systemActionFunctions": [],
+            "functionLibraries": [],
+            "utilities": []
+        },
+        "plugins": []
     }
+    
 ]

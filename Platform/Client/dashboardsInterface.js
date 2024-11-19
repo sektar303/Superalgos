@@ -2,15 +2,18 @@ exports.newDashboardsInterface = function newDashboardsInterface() {
     /* This file holds the interface that aggregates metrics and any other system data
        and then sends it over websocket to the Dashboards App */
     
-    // todo: refactor eventserver client to it's own file
-    // todo: events server dashboard
-    // todo: tasks manager dashboard 
-    // todo: create generic dashboard reporter function that can be drop into any place within the platform
-    // todo: make dashboard reporter function able to be interval or event based
-    // todo: connect dashboard interface when dashboard app is started second
-    // todo: set up dashboards project to hold function libraries
-    // todo: add platform menu to launch dashboards app
-    // todo: create dashboards reporter node to allow control of dashboard reporting from platform UI 
+    // todo: refactor eventserver client to it's own file (in progress)
+    // todo: events server dashboard (in progress)
+    // todo: tasks manager dashboard (in progress)
+    // todo: create generic dashboard reporter function that can be drop into any place within the platform (in progress)
+    // todo: make dashboard reporter function able to be interval or event based (in progress) (Added to Schemas; Report Timer and Report Conditions/Formula)
+    // todo: connect dashboard interface when dashboard app is started second (in progress)
+    // todo: set up dashboards project to hold function libraries (in progress)
+    // todo: add platform menu to launch dashboards app (done via API)
+    // todo: create dashboards reporter node to allow control of dashboard reporting from platform UI (in progress)
+    
+    // Marktradeink NOTES: Created Dashboards Project > Dashboards Manager Bot (here you can add Dashboards Bots as many as you want), Each Bot will send a report to Dashboards App. So you can individually reference Report Nodes to the Dashboards Bot you want. 
+    // Example: Strategy #1 will send a Report via Dashboards Bot #1
 
 
     let thisObject = {
@@ -19,13 +22,13 @@ exports.newDashboardsInterface = function newDashboardsInterface() {
         run: run
     }
 
-    const WEB_SOCKET = SA.nodeModules.ws
-    let socketClient
-    let port = global.env.DASHBOARDS_WEB_SOCKETS_INTERFACE_PORT
-    let url = 'ws://localhost:'+ port
-    let eventsServerClient = PL.servers.TASK_MANAGER_SERVER.newEventsServerClient()
+    const WEB_SOCKET = SA.nodeModules.ws;
+    let socketClient;
+    let port = global.env.DASHBOARDS_WEB_SOCKETS_INTERFACE_PORT;
+    let url = 'ws://localhost:'+ port;
+    let eventsServerClient = PL.servers.TASK_MANAGER_SERVER.newEventsServerClient();
+    let messageQueue = [];
     //const path = require('path'); 
-
 
     return thisObject
 
@@ -41,6 +44,7 @@ exports.newDashboardsInterface = function newDashboardsInterface() {
                 setUpWebSocketClient(url)
 
             } else if (response.event.isRunning === false) {
+                SA.logger.warn('[WARN] Dashboards App is not running.');
                 //Skip websocket client initalization
                 //SA.logger.info('')
                 //SA.logger.info(response.event.message)
@@ -101,68 +105,76 @@ exports.newDashboardsInterface = function newDashboardsInterface() {
     }      
 
     function finalize() {
-        socketClient = undefined
+        if (socketClient) {
+            socketClient.terminate(); // Termina cualquier conexión existente
+            socketClient = undefined;
+        }
     }
 
     async function run() {
-     
-        checkDashboardAppStatus(port, statusResponse)
+        // Verifica el estado del Dashboard cada 10 segundos hasta que esté corriendo
+        const interval = setInterval(() => {
+            checkDashboardAppStatus(port, statusResponse);
+        }, 10000); // Reintentar cada 10 segundos
 
         function statusResponse(status, message) {
-            let event = {
-                isRunning: status,
-                message: message
-            }   
-            eventsServerClient.raiseEvent("Dashboard Manager", 'Dashboard App Status', event)
+            if (status) {
+                clearInterval(interval); // Detiene los intentos cuando el Dashboard está corriendo
+                let event = {
+                    isRunning: status,
+                    message: message
+                };
+                eventsServerClient.raiseEvent("Dashboard Manager", 'Dashboard App Status', event);
+                setUpWebSocketClient(url);
+            } else {
+                SA.logger.warn(`[WARN] ${message}`);
+            }
         }
     }
 
     async function checkDashboardAppStatus(port, callbackFunc) {
-        var net = require('net')
-        var tester = net.createServer()
-        .once('error', function (err) {
-          if (err.code != 'EADDRINUSE') {
-            callbackFunc(err)
-          } else {
-            callbackFunc(true, 'Dashboard App Interface is Running!')
-          }
-        })
-        .once('listening', function() {
-            tester.once('close', function() { 
-                callbackFunc(false, 'Dashboard App is not Running... Pausing Interface.') 
+        const net = require('net');
+        const tester = net.createServer()
+            .once('error', function (err) {
+                if (err.code !== 'EADDRINUSE') {
+                    callbackFunc(false, '[ERROR] Unexpected error checking Dashboard status.');
+                } else {
+                    callbackFunc(true, '[INFO] Dashboard App Interface is Running!');
+                }
             })
-            .close()
-        })
-        .listen(port)
+            .once('listening', function () {
+                tester.once('close', function () {
+                    // callbackFunc(false, '[WARN] Dashboard App is not Running... Pausing Interface.');
+                }).close();
+            })
+            .listen(port);
     }
+
     
     function setUpWebSocketClient(url) {
         socketClient = new WEB_SOCKET.WebSocket(url)
 
-        socketClient.on('open', function (open) {
+        socketClient.on('open', function () {
+            SA.logger.info('[INFO] WebSocket connection established.');
             let message = (new Date()).toISOString() + '|*|Platform|*|Info|*|Platform Dashboards Client has been Opened'
             socketClient.send(message)
-            
-            //sendExample()
-            //sendGlobals()
-            // Resend every 10 minutes
-            //setInterval(sendGlobals, 6000)
-            //sendGovernance()
 
-            sendSimulationData();
-            sendCandlesData();  
-            //sendOutputData();
-            setInterval(sendSimulationData, 60000);
-            setInterval(sendCandlesData, 60000);         
-            // setInterval(sendOutputData, 60000);         
+            while (messageQueue.length > 0) {
+                const message = messageQueue.shift();
+                socketClient.send(message);
+            }
+
+            startSendingData();
+        });        
+
+        socketClient.on('close', function () {
+            SA.logger.warn('[WARN] WebSocket connection closed. Attempting to reconnect...');
+            retryConnection();
         });
 
-        socketClient.on('close', function (close) {
-            SA.logger.info('[INFO] Dashboard App has been disconnected.')
-        })
-
         socketClient.on('error', function (error) {
-            SA.logger.error('[ERROR] Dashboards Client error: ', error.message, error.stack)
+            SA.logger.error(`[ERROR] Dashboards Client error: ${error.message}`);
+            retryConnection();
         });
         
         socketClient.on('message', function (message) {
@@ -170,7 +182,34 @@ exports.newDashboardsInterface = function newDashboardsInterface() {
         });
     }
 
-    async function sendSimulationData() {
+    function retryConnection() {
+        if (socketClient) {
+            socketClient.terminate(); // Asegura que la conexión previa esté cerrada
+        }
+
+        setTimeout(() => {
+            SA.logger.info(`[INFO] Attempting to reconnect to Dashboards App...`);
+            setUpWebSocketClient(url);
+        }, 5000); // Reintenta cada 5 segundos
+    }
+
+    function startSendingData() {
+        // Enviar datos periódicamente solo después de que la conexión esté abierta
+        //sendExample()
+        //sendGlobals()
+        // Resend every 10 minutes
+        //setInterval(sendGlobals, 6000)
+        //sendGovernance()
+
+        sendSimulationData();
+        sendCandlesData();  
+        //sendOutputData();
+        setInterval(sendSimulationData, 60000);
+        setInterval(sendCandlesData, 60000);         
+        // setInterval(sendOutputData, 60000); 
+    }
+
+    async function sendSimulationData() {        
         const fs = require('fs').promises;
         const path = require('path');
     
@@ -206,18 +245,16 @@ exports.newDashboardsInterface = function newDashboardsInterface() {
                 }
     
                 jsonData.reportPath = reportPath; // Agrega el path del reporte
-    
-                //SA.logger.info('Data to send (before stringifying):', jsonData);
-    
-                // Serializar jsonData a una cadena JSON
                 const jsonDataString = JSON.stringify(jsonData);
-    
-                // Construir el mensaje a enviar
                 const messageToSend = `${new Date().toISOString()}|*|Platform|*|Data|*|SimulationResult|*|${jsonDataString}`;
-    
-                //SA.logger.info('Message send from:', JSON.stringify(reportPath));
-    
-                socketClient.send(messageToSend);
+
+                if (socketClient.readyState === WEB_SOCKET.OPEN) {
+                    socketClient.send(messageToSend);
+                } else {
+                    // Si la conexión aún no está abierta, almacena el mensaje en la cola
+                    messageQueue.push(messageToSend);
+                    SA.logger.warn('[WARN] WebSocket is not open. Message queued.');
+                }
             }
         } catch (error) {
             console.error('Error processing simulation data:', error);
@@ -319,8 +356,17 @@ exports.newDashboardsInterface = function newDashboardsInterface() {
                     exchangePair,
                     candleData,
                 };
+
                 let messageToSend = `${new Date().toISOString()}|*|Platform|*|Data|*|CandlesData|*|${JSON.stringify(filteredData)}`;
-                socketClient.send(messageToSend);
+                
+                if (socketClient.readyState === WEB_SOCKET.OPEN) {
+                    socketClient.send(messageToSend);
+                } else {
+                    // Si la conexión aún no está abierta, almacena el mensaje en la cola
+                    messageQueue.push(messageToSend);
+                    SA.logger.warn('[WARN] WebSocket is not open. Message queued.');
+                }
+
                 //SA.logger.info(`Candles data sent from SA to Dashboard for ${exchangePair}`);
                 //SA.logger.info(`Candles data sent from SA to Dashboard for ${messageToSend}`);  
             }

@@ -57,7 +57,7 @@ async function runRoot() {
   /*
   Version Management
   */
-  SA.version = "Alpha 1"
+  SA.version = "Alpha 1.1"
 
   let mode
   for (let i = 0; i < process.argv.length; i++) {
