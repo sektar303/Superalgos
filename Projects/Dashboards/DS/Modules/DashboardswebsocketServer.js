@@ -1,4 +1,4 @@
-const {newEnvironment} = require("../../Environment")
+const {newEnvironment} = require("../../../Environment")
 
 exports.newWebSocketsServer = function newWebSocketsServer() {
     

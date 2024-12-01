@@ -42,7 +42,15 @@ async function runRoot() {
     fs: require('fs'),
     util: require('util'),
     path: require('path'),
-    ws: require('ws')
+    ws: require('ws'),
+    http: require('http'),
+    web3: require('web3'),
+    simpleGit: require('simple-git'),
+    octokit: require('@octokit/rest'),
+    graphql: require('@octokit/graphql'),
+    nodeFetch: require('node-fetch'),
+    childProcess: require('child_process'),
+    process: require('process'),
   }
 
   const saLogsPath = SA.nodeModules.path.join(global.env.PATH_TO_LOG_FILES, 'Dashboards')
