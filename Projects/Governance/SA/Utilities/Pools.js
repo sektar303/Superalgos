@@ -55,10 +55,4 @@ exports.newGovernanceUtilitiesPools = function newGovernanceUtilitiesPools() {
             }
         }
     }
-
-    function getSchemaDocument(node) {
-        if (node.project === undefined || node.type === undefined) { return }
-        let schemaDocument = SA.projects.foundations.globals.schemas.APP_SCHEMA_MAP.get(node.project + '-' + node.type)
-        return schemaDocument
-    }
 }

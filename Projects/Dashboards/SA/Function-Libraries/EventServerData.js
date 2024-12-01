@@ -31,8 +31,9 @@ exports.newEventServerData = function newEventServerData() {
                         eventHandlerName: listener[0],
                         eventType: listener[1],
                         callerId: listener[2],
-                        extraData: listener[4],
-                        extraData: listener[5]
+                        extraData0: listener[4],
+                        extraData1: listener[5],
+                        extraData2: listener[6]
                     };
                 });
 

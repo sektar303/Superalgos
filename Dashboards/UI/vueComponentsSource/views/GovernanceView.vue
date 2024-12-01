@@ -79,7 +79,7 @@
           <div>
             <div v-for="profile in allUserProfiles" :key="profile.profileId" class="programs-token-power">
               <h4>{{ profile.name }}</h4>
-              <table class="table table-bordered">
+              <Table class="table table-bordered">
                 <thead>
                   <tr>
                     <th>Program Name</th>
@@ -92,7 +92,7 @@
                     <td>{{ program.tokenPower }}</td>
                   </tr>
                 </tbody>
-              </table>
+              </Table>
             </div>
           </div>
         </template>
@@ -103,7 +103,7 @@
             <h3>Programs Token Power</h3>
             <div v-for="profile in allUserProfiles" :key="profile.profileId" class="programs-token-power">
               <h4>{{ profile.name }}</h4>
-              <table class="table table-bordered">
+              <Table class="table table-bordered">
                 <thead>
                   <tr>
                     <th>Program Name</th>
@@ -116,7 +116,7 @@
                     <td>{{ program.tokenPower }}</td>
                   </tr>
                 </tbody>
-              </table>
+              </Table>
             </div>
           </div>
         </template>

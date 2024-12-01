@@ -31,7 +31,7 @@ exports.newDashboardsAppBootstrappingProcess = function newDashboardsAppBootstra
             //SA.logger.info(' ')
         
             // Cargar los Pools
-            const pools = await loadPools()
+            //const pools = await loadPools()
         
             // Convertimos el Map a un Array de [id, profile] para pasarlo a las funciones
             let userProfilesArray = Array.from(thisObject.userProfilesById.entries());
@@ -91,6 +91,7 @@ exports.newDashboardsAppBootstrappingProcess = function newDashboardsAppBootstra
         return userProfilesById
     }
     
+    /*
     async function loadPools() {
         // SA.logger.info(' ')
         // SA.logger.info('Loading Pools into memory for Dashboards...')
@@ -161,7 +162,8 @@ exports.newDashboardsAppBootstrappingProcess = function newDashboardsAppBootstra
     
         return pools
     }
-    
+    */
+
     function assignTokensToPools(node) {
         if (node.type === 'Pool') {
             // Asegurarse de que node.payload está inicializado
@@ -304,7 +306,7 @@ exports.newDashboardsAppBootstrappingProcess = function newDashboardsAppBootstra
             userProfile.balancesByChain = {}
     
             // Calculate the progress percentage
-            let progressPercentage = ((i + 1) / totalProfiles * 100).toFixed(2)
+            //let progressPercentage = ((i + 1) / totalProfiles * 100).toFixed(2)
     
             // Display the progress
             //SA.logger.info(`Processing User Profiles: ${progressPercentage}% (${i + 1}/${totalProfiles})`)
