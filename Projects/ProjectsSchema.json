@@ -1804,12 +1804,6 @@
                     "propertyName": "profileTokenPower",
                     "functionName": "newGovernanceFunctionLibraryProfileTokenPower",
                     "fileName": "ProfileTokenPower.js"
-                },
-                {
-                    "name": "Airdrop Program",
-                    "propertyName": "airdropProgram",
-                    "functionName": "newGovernanceFunctionLibraryAirdropProgram",
-                    "fileName": "AirdropProgram.js"
                 }
             ],
             "utilities": [
