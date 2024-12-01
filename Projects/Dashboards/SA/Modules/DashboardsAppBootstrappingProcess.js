@@ -269,7 +269,7 @@ exports.newDashboardsAppBootstrappingProcess = function newDashboardsAppBootstra
             }
     
             // **Agregar log para balance**
-            //SA.logger.info(`User profile ${userProfile.name} balance: ${userProfile.balance}`)
+            SA.logger.info(`User profile ${userProfile.name} balance: ${userProfile.balance}`)
         }
     }    
 
