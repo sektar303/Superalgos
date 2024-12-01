@@ -162,54 +162,7 @@ exports.newDashboardsAppBootstrappingProcess = function newDashboardsAppBootstra
     
         return pools
     }
-    */
-
-    function assignTokensToPools(node) {
-        if (node.type === 'Pool') {
-            // Asegurarse de que node.payload está inicializado
-            if (node.payload === undefined) { node.payload = {} }
-            if (node.config === undefined) { node.config = {} }
-    
-            if (node.config.codeName === 'Airdrop-Rewards') {
-                node.payload.tokens = 100000 // Asigna aquí el valor de tokens que desees
-                //SA.logger.info(`Assigned tokens to pool ${node.name}: ${node.payload.tokens}`)
-            } else {
-                node.payload.tokens = node.payload.tokens || 0
-            }
-        }
-    
-        // Recursivamente asignar a los nodos hijos
-        let schemaDocument = getSchemaDocument(node)
-        if (schemaDocument === undefined) { return }
-    
-        if (schemaDocument.childrenNodesProperties !== undefined) {
-            for (let i = 0; i < schemaDocument.childrenNodesProperties.length; i++) {
-                let property = schemaDocument.childrenNodesProperties[i]
-    
-                switch (property.type) {
-                    case 'node': {
-                        let childNode = node[property.name]
-                        if (childNode !== undefined) {
-                            assignTokensToPools(childNode)
-                        }
-                        break
-                    }
-                    case 'array': {
-                        let propertyArray = node[property.name]
-                        if (propertyArray !== undefined) {
-                            for (let m = 0; m < propertyArray.length; m++) {
-                                let childNode = propertyArray[m]
-                                if (childNode !== undefined) {
-                                    assignTokensToPools(childNode)
-                                }
-                            }
-                        }
-                        break
-                    }
-                }
-            }
-        }
-    }    
+    */  
     
     async function loadUserProfilesPlugins(userProfilesById) {
         let pluginFileNames = await SA.projects.communityPlugins.utilities.plugins.getPluginFileNames(
@@ -295,7 +248,6 @@ exports.newDashboardsAppBootstrappingProcess = function newDashboardsAppBootstra
 
     async function loadUserProfilesBalances(userProfilesById) {
         let userProfilesArray = Array.from(userProfilesById.values());
-        let totalProfiles = userProfilesArray.length;
     
         SA.logger.info('Updating wallet balances for each User Profile.')
         SA.logger.info('')

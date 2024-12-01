@@ -49,9 +49,9 @@ exports.newDashboardsInterface = function newDashboardsInterface() {
             socketClient.terminate(); // Termina cualquier conexión existente
             socketClient = undefined;
         }
-        if (dataSendingInterval) {
-            clearInterval(dataSendingInterval); // Detener el envío periódico de datos
-        }
+        // if (dataSendingInterval) {
+        //     clearInterval(dataSendingInterval); // Detener el envío periódico de datos
+        // }
     }
 
     async function run() {
