@@ -23,7 +23,7 @@ exports.newDashboardsInterface = function newDashboardsInterface() {
     let port = global.env.DASHBOARDS_WEB_SOCKETS_INTERFACE_PORT;
     let url = 'ws://localhost:' + port;
     let eventsServerClient = eventServerClientModule.newEventServerClient();
-    let dataSendingInterval;
+    //let dataSendingInterval;
 
     return thisObject;
 
