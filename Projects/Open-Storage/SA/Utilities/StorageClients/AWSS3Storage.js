@@ -57,12 +57,9 @@ exports.newOpenStorageUtilitiesAWSS3Storage = function newOpenStorageUtilitiesAW
                 return res.data
             })
             .catch(error => {
-                SA.logger.error('Github Storage -> Load File -> Error = ' + error)
-                SA.logger.error('Github Storage -> Load File -> completePath = ' + completePath)
-                SA.logger.error('Github Storage -> Load File -> repo = ' + repo)
-                SA.logger.error('Github Storage -> Load File -> owner = ' + owner)
-                SA.logger.error('Github Storage -> Load File -> branch = ' + branch)
-                SA.logger.error('Github Storage -> Load File -> URL = ' + URL)
+                SA.logger.error('AWS S3 Storage -> Load File -> Error = ' + error)
+                SA.logger.error('AWS S3 Storage -> Load File -> completePath = ' + completePath)
+                SA.logger.error('AWS S3 Storage -> Load File -> URL = ' + URL)
             })
     }
 
@@ -116,7 +113,7 @@ exports.newOpenStorageUtilitiesAWSS3Storage = function newOpenStorageUtilitiesAW
             if(secret.region) {
                 options.region = secret.region
             }
-            if(storageContainer.config.bucketRegion !== undefined && storageContainer.config.bucketRegion.length > 0) {
+            else if(storageContainer.config.bucketRegion !== undefined && storageContainer.config.bucketRegion.length > 0) {
                 options.region = storageContainer.config.bucketRegion
             }
             const { S3Client } = SA.nodeModules.awsS3
