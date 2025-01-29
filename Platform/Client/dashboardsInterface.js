@@ -1,264 +1,240 @@
 exports.newDashboardsInterface = function newDashboardsInterface() {
-    /* This file holds the interface that aggregates metrics and any other system data
-       and then sends it over websocket to the Dashboards App */
-    
-    // todo: refactor eventserver client to it's own file
-    // todo: events server dashboard
-    // todo: tasks manager dashboard 
-    // todo: create generic dashboard reporter function that can be drop into any place within the platform
-    // todo: make dashboard reporter function able to be interval or event based
-    // todo: connect dashboard interface when dashboard app is started second
-    // todo: set up dashboards project to hold function libraries
-    // todo: add platform menu to launch dashboards app
-    // todo: create dashboards reporter node to allow control of dashboard reporting from platform UI 
+    /* 
+    Este archivo maneja la interfaz que agrega métricas y otros datos del sistema
+    y los envía a través de WebSocket a la Aplicación Dashboards 
+    */
 
+    const eventServerClientModule = SA.projects.dashboards.modules.dashboardsEventServerClient;
+    const simulationDataFunction = SA.projects.dashboards.functionLibraries.SimulationData;
+    const candlesDataFunction = SA.projects.dashboards.functionLibraries.CandlesData;
+    const examplesDataFunction = SA.projects.dashboards.functionLibraries.ExamplesData;    
+    const eventServerDataFunction = SA.projects.dashboards.functionLibraries.EventServerData;
+    const taskManagerDataFunction = SA.projects.dashboards.functionLibraries.TaskManagerData;
+    const governanceDataModule = SA.projects.dashboards.functionLibraries.GovernanceData;
 
     let thisObject = {
         initialize: initialize,
         finalize: finalize,
         run: run
-    }
+    };
 
-    const WEB_SOCKET = SA.nodeModules.ws
-    let socketClient
-    let port = global.env.DASHBOARDS_WEB_SOCKETS_INTERFACE_PORT
-    let url = 'ws://localhost:'+ port
-    let eventsServerClient = PL.servers.TASK_MANAGER_SERVER.newEventsServerClient()
+    const WEB_SOCKET = SA.nodeModules.ws;
+    let socketClient;
+    let port = global.env.DASHBOARDS_WEB_SOCKETS_INTERFACE_PORT;
+    let url = 'ws://localhost:' + port;
+    let eventsServerClient = eventServerClientModule.newEventServerClient();
+    //let dataSendingInterval;
 
+    return thisObject;
 
-    return thisObject
+    async function initialize() {
+        eventsServerClient.createEventHandler('Dashboard Manager');
+        eventsServerClient.listenToEvent('Dashboard Manager', 'Dashboard App Status', undefined, undefined, undefined, runInterface);
 
-    function initialize () {
-
-        eventsServerClient.createEventHandler('Dashboard Manager')
-        eventsServerClient.listenToEvent('Dashboard Manager', 'Dashboard App Status', undefined, undefined, undefined, runInterface)
-        
-        function runInterface (response){
+        function runInterface(response) {
             if (response.event.isRunning === true) {
-                SA.logger.info('')
-                SA.logger.info(response.event.message)
-                setUpWebSocketClient(url)
-
+                SA.logger.info('');
+                SA.logger.info(response.event.message);
+                setUpWebSocketClient(url);
             } else if (response.event.isRunning === false) {
-                //Skip websocket client initalization
-                //SA.logger.info('')
-                //SA.logger.info(response.event.message)
-
+                SA.logger.warn('[WARN] Dashboards App is not running.');
             } else {
-                SA.logger.error('[ERROR] Something went wrong running the Dashboard App Interface: ', response)
+                SA.logger.error('[ERROR] Something went wrong running the Dashboard App Interface: ', response);
             }
         }
-
-
-        // Beginings of Task manager code
-            //SA.logger.info('can we get this object', tasksMap)
-            //eventsServerClient.listenToEvent('Task Manager', 'Run Task', undefined, undefined, undefined, newMessage)
-            //eventsServerClient.listenToEvent('Task Manager', 'Stop Task', undefined, undefined, undefined, newMessage)
-            //eventsServerClient.listenToEvent('Task Manager', 'Task Status', undefined, undefined, undefined, newMessage)
-            // listen to all the task clients let eventHandlerKey = "Task Client - " + node.payload.parentNode.payload.parentNode.payload.parentNode.id
-            // eventsServerClient.listenToEvent(eventHandlerKey, 'Task Status', undefined, node.id, onResponse, onStatus)
-            // let task = tasksMap.get(message.event.taskId)
-            // eventsServerClient.raiseEvent('Task Client - ' + message.event.taskId, 'Task Status', event)
-
-            /* function newMessage (message) {
-                SA.logger.info('this is the message in the dashboards client event listeners', message)
-            } */
-
-  
-            // eventsServerClient.listenToEvent('Task Manager - ' + message.event.taskId, 'Nodejs Process Ready for Task', undefined, undefined, undefined, sendStartingEvent)
-
-                    /* Listen to event to start or stop the session. 
-                    TS.projects.foundations.globals.taskConstants.EVENT_SERVER_CLIENT_MODULE_OBJECT.listenToEvent(
-                        TS.projects.foundations.globals.processVariables.VARIABLES_BY_PROCESS_INDEX_MAP.get(processIndex).SESSION_KEY,
-                        'Trading Session Status',
-                        undefined,
-                        TS.projects.foundations.globals.processVariables.VARIABLES_BY_PROCESS_INDEX_MAP.get(processIndex).SESSION_KEY,
-                        undefined,
-                        onSessionStatus)
-                    TS.projects.foundations.globals.taskConstants.EVENT_SERVER_CLIENT_MODULE_OBJECT.listenToEvent(
-                        TS.projects.foundations.globals.processVariables.VARIABLES_BY_PROCESS_INDEX_MAP.get(processIndex).SESSION_KEY,
-                        'Run Trading Session',
-                        undefined,
-                        TS.projects.foundations.globals.processVariables.VARIABLES_BY_PROCESS_INDEX_MAP.get(processIndex).SESSION_KEY,
-                        undefined,
-                        onSessionRun)
-                    TS.projects.foundations.globals.taskConstants.EVENT_SERVER_CLIENT_MODULE_OBJECT.listenToEvent(
-                        TS.projects.foundations.globals.processVariables.VARIABLES_BY_PROCESS_INDEX_MAP.get(processIndex).SESSION_KEY,
-                        'Stop Trading Session',
-                        undefined,
-                        TS.projects.foundations.globals.processVariables.VARIABLES_BY_PROCESS_INDEX_MAP.get(processIndex).SESSION_KEY,
-                        undefined,
-                        onSessionStop)
-                    TS.projects.foundations.globals.taskConstants.EVENT_SERVER_CLIENT_MODULE_OBJECT.listenToEvent(
-                        TS.projects.foundations.globals.processVariables.VARIABLES_BY_PROCESS_INDEX_MAP.get(processIndex).SESSION_KEY,
-                        'Resume Trading Session',
-                        undefined,
-                        TS.projects.foundations.globals.processVariables.VARIABLES_BY_PROCESS_INDEX_MAP.get(processIndex).SESSION_KEY,
-                        undefined,
-                        onSessionResume)
-                        */
-    }      
+    }
 
     function finalize() {
-        socketClient = undefined
+        if (socketClient) {
+            socketClient.terminate(); // Termina cualquier conexión existente
+            socketClient = undefined;
+        }
+        // if (dataSendingInterval) {
+        //     clearInterval(dataSendingInterval); // Detener el envío periódico de datos
+        // }
     }
 
     async function run() {
-     
-        checkDashboardAppStatus(port, statusResponse)
+        const interval = setInterval(() => {
+            checkDashboardAppStatus(port, statusResponse);
+        }, 10000); // Reintentar cada 10 segundos
 
         function statusResponse(status, message) {
-            let event = {
-                isRunning: status,
-                message: message
-            }   
-            eventsServerClient.raiseEvent("Dashboard Manager", 'Dashboard App Status', event)
+            if (status) {
+                clearInterval(interval); // Detiene los intentos cuando el Dashboard está corriendo
+                let event = {
+                    isRunning: status,
+                    message: message
+                };
+                eventsServerClient.raiseEvent("Dashboard Manager", 'Dashboard App Status', event);
+                setUpWebSocketClient(url);
+            } else {
+                SA.logger.warn(`[WARN] ${message}`);
+            }
         }
     }
 
     async function checkDashboardAppStatus(port, callbackFunc) {
-        var net = require('net')
-        var tester = net.createServer()
-        .once('error', function (err) {
-          if (err.code != 'EADDRINUSE') {
-            callbackFunc(err)
-          } else {
-            callbackFunc(true, 'Dashboard App Interface is Running!')
-          }
-        })
-        .once('listening', function() {
-            tester.once('close', function() { 
-                callbackFunc(false, 'Dashboard App is not Running... Pausing Interface.') 
+        const net = require('net');
+        const tester = net.createServer()
+            .once('error', function (err) {
+                if (err.code !== 'EADDRINUSE') {
+                    callbackFunc(false, '[ERROR] Unexpected error checking Dashboard status.');
+                } else {
+                    callbackFunc(true, '[INFO] Dashboard App Interface is Running!');
+                }
             })
-            .close()
-        })
-        .listen(port)
+            .once('listening', function () {
+                tester.once('close', function () {
+                    //callbackFunc(false, '[WARN] Dashboard App is not Running... Pausing Interface.');
+                }).close();
+            })
+            .listen(port);
+    }
+
+    function setUpWebSocketClient(url) {
+        socketClient = new WEB_SOCKET.WebSocket(url);
+    
+        socketClient.on('open', async function () {
+            SA.logger.info('[INFO] WebSocket connection established.');
+            let message = (new Date()).toISOString() + '|*|Platform|*|Info|*|Platform Dashboards Client has been Opened';
+            sendMessage(message);
+            
+            // **Inicializar EventServerData y TaskManagerData**
+            eventServerDataFunction.initialize(socketClient, WEB_SOCKET);
+            taskManagerDataFunction.initialize(socketClient, WEB_SOCKET);
+
+            // **Inicializar GovernanceData**
+            await initializeGovernanceData();
+
+            // Iniciar el envío de datos periódicamente
+            startSendingData();
+        });
+    
+        socketClient.on('close', function () {
+            SA.logger.warn('[WARN] WebSocket connection closed. Attempting to reconnect...');
+            retryConnection();
+        });
+    
+        socketClient.on('error', function (error) {
+            SA.logger.error(`[ERROR] Dashboards Client error: ${error.message}`);
+            retryConnection();
+        });
+    
+        socketClient.on('message', function (message) {
+            SA.logger.info('[INFO] Message received from Dashboards App:', message);
+        });
     }
     
-    function setUpWebSocketClient(url) {
-        socketClient = new WEB_SOCKET.WebSocket(url)
-
-        socketClient.on('open', function (open) {
-            let message = (new Date()).toISOString() + '|*|Platform|*|Info|*|Platform Dashboards Client has been Opened'
-            socketClient.send(message)
-            
-            //sendExample()
-            //sendGlobals()
-            // Resend every 10 minutes
-            //setInterval(sendGlobals, 6000)
-
-            sendGovernance()
-            setInterval(sendGovernance, 6000)
-        });
-
-        socketClient.on('close', function (close) {
-            SA.logger.info('[INFO] Dashboard App has been disconnected.')
-        })
-
-        socketClient.on('error', function (error) {
-            SA.logger.error('[ERROR] Dashboards Client error: ', error.message, error.stack)
-        });
-        
-        socketClient.on('message', function (message) {
-            SA.logger.info('This is a message coming from the Dashboards App', message)
-        });
+    function retryConnection() {
+        if (socketClient) {
+            socketClient.terminate(); // Asegura que la conexión previa esté cerrada
+        }
+    
+        setTimeout(() => {
+            SA.logger.info('[INFO] Attempting to reconnect to Dashboards App...');
+            setUpWebSocketClient(url);
+        }, 5000); // Reintenta cada 5 segundos
     }
-
-    function sendGlobals() {
-        // This function packs and then sends the Global objects to the inspector
-        packedSA = packGlobalObj('SA', SA)
-        packedPL = packGlobalObj('PL', PL)
-
-        //let parsed = JSON.parse(data)
-        //SA.logger.info('this is the parsed object', parsed)
-        let messageToSend = (new Date()).toISOString() + '|*|Platform|*|Data|*|Globals|*|' + packedSA + '|*|' + packedPL
-        socketClient.send(messageToSend)
-
-        // todo: handle global TS object 
-        // note: Access event handlers PL.servers.EVENT_SERVER.eventHandlers
-
-        function packGlobalObj (name, object) {
-            // This function copies a global object over to a simple JS Object and then is stringified to JSON in order to be sent over websocket
-            let packedGlobal = {}
-            packedGlobal[name] = recursivelyCopy(object)
-
-            return JSON.stringify(packedGlobal)
-
-            function recursivelyCopy (object) {
-                let objectCopy = {}
-        
-                if (typeof object === 'object') {
-                    // Break down various object types and copy them all to a simple javascript object
-                    if (object instanceof Array) {
-                        object.forEach( function (value, index) {
-                            objectCopy[index] = recursivelyCopy(value)
-
-                        })
-                    } else if (object instanceof Map) {
-                        object.forEach( function (value, key) {
-                            objectCopy[key] = recursivelyCopy(value)
-
-                        })
-                    } else if (object instanceof Object) {
-                        for (let element in object ) {
-                            if (element === 'nodeModules') {
-                                //Only copies name of each dependency
-                                let dependencies = []
-                                for (let module in object[element] ) {
-                                    dependencies.push(module)
-                                }
-                                objectCopy[element] = dependencies
-                            } else {
-                                objectCopy[element] = recursivelyCopy(object[element])
-                            }
-                        }
-                    } 
-                } else if (typeof object === 'function') {
-                    objectCopy = object.constructor.name
-
-                } else {
-                    // All other variables are directly assigned to objectCopy
-                    objectCopy = object
-
-                } 
-                return objectCopy
+    
+    async function initializeGovernanceData() {
+        try {
+            //SA.logger.info('[InitializeGovernanceData] Sending Governance Data.');
+            
+            // Acceder a userProfilesById directamente desde la memoria global
+            const bootstrappingProcess = SA.projects.dashboards.modules.dashboardsAppBootstrappingProcess.newDashboardsAppBootstrappingProcess();
+    
+            await bootstrappingProcess.initialize();
+            await bootstrappingProcess.run();
+    
+            const userProfilesById = bootstrappingProcess.userProfilesById;
+    
+            //SA.logger.info('userProfilesById:', userProfilesById);
+    
+            if (!userProfilesById || userProfilesById.size === 0) {
+                //SA.logger.warn('[WARN] USER_PROFILES_BY_ID is undefined or empty.');
+                return;
             }
+    
+            // Inicializar y enviar GovernanceData
+            governanceDataModule.initialize(
+                socketClient,
+                WEB_SOCKET,
+                userProfilesById
+            );
+            //SA.logger.info('[InitializeGovernanceData] GovernanceData initialized.');
+            governanceDataModule.sendGovernanceData();
+            //SA.logger.info('[InitializeGovernanceData] GovernanceData.sendGovernanceData() called.');
+    
+        } catch (err) {
+            SA.logger.error('[ERROR] Error sending Governance Data:', err);
         }
     }
-    async function sendGovernance() {
-        /*let test = {
-                                User1: {name: 'UserName', wallet: 'User BlockchainWallet', SAbalance: 123456789, TokenPower: 987654321},
-                                User2: {name: 'UserName', wallet: 'User BlockchainWallet', SAbalance: 'User Token Balance', TokenPower: 'User Token Power'},
-                                User3: {name: 'UserName', wallet: 'User BlockchainWallet', SAbalance: 'User Token Balance', TokenPower: 'User Token Power'},
+    
+    function startSendingData() {
+        
+        setInterval(() => {
+            if (socketClient && socketClient.readyState === WEB_SOCKET.OPEN) {
+                simulationDataFunction.newSimulationData(socketClient, WEB_SOCKET);
+            } else {
+                SA.logger.warn('[WARN] WebSocket client is not ready. Retrying send Simulation Data...');
+            }
+        }, 10000); 
 
-                            }
-        */
-        let userInfo1 = Array.from(SA.projects.network.globals.memory.maps.USER_PROFILES_BY_ID)
-        let userInfo2 = await SA.projects.network.modules.AppBootstrapingProcess.extractInfoFromUserProfiles(userProfile)
+        setInterval(() => {
+            if (socketClient && socketClient.readyState === WEB_SOCKET.OPEN) {
+                candlesDataFunction.newCandlesData(socketClient, WEB_SOCKET);
+            } else {
+                SA.logger.warn('[WARN] WebSocket client is not ready. Retrying to send candle data...');
+            }
+        }, 10000); 
+        
+        setInterval(() => {
+            if (socketClient && socketClient.readyState === WEB_SOCKET.OPEN) {
+                examplesDataFunction.sendExampleData(socketClient, WEB_SOCKET);
+            } else {
+                SA.logger.warn('[WARN] WebSocket client is not ready. Retrying to send example data...');
+            }
+        }, 10000);
 
-        userInfo2
+        // **Envío Periódico de GovernanceData**
+        setInterval(() => {
+            if (socketClient && socketClient.readyState === WEB_SOCKET.OPEN) {
+                governanceDataModule.sendGovernanceData();
+                //SA.logger.info('[INFO] Governance Data sent successfully.');
+            } else {
+                SA.logger.warn('[WARN] WebSocket client is not ready. Retrying to send Governance Data...');
+            }
+        }, 10000); // Cada 10 segundos
 
-        let messageToSend = (new Date()).toISOString() + '|*|Platform|*|Data|*|Governance-UserInfo|*|'/* + JSON.stringify(test) */+ '|*|' + JSON.stringify(userInfo1) + '|*|' + JSON.stringify(userInfo2)
-        socketClient.send(messageToSend)
+        // **Envío Periódico de EventServerData y TaskManagerData**
+        setInterval(() => {
+            if (socketClient && socketClient.readyState === WEB_SOCKET.OPEN) {
+                eventServerDataFunction.sendEventServerData();
+                //SA.logger.info('[INFO] Event Server Data sent successfully.');
+            } else {
+                SA.logger.warn('[WARN] WebSocket client is not ready. Retrying to send Event Server Data...');
+            }
+        }, 10000); // Cada 10 segundos
 
-        //SA.logger.info('from UserInfo to Dashboard APP:' , test)
-        SA.logger.info('from UserInfo 1 to Dashboard APP:' , userInfo1)
-        SA.logger.info('from UserInfo 2 to Dashboard APP:' , userInfo2)
+        setInterval(() => {
+            if (socketClient && socketClient.readyState === WEB_SOCKET.OPEN) {
+                taskManagerDataFunction.sendTaskManagerData();
+                //SA.logger.info('[INFO] Task Manager Data sent successfully.');
+            } else {
+                SA.logger.warn('[WARN] WebSocket client is not ready. Retrying to send Task Manager Data...');
+            }
+        }, 10000); // Cada 10 segundos
 
     }
-    function sendExample() {
-        let oneObjToSend = { 
-                                example1: 'string data', 
-                                example2: 79456, 
-                                example3: { nestedObj1: 'more string data', nestedObj2: 9097789 }
-                            }
-
-        let twoObjToSend = {
-                                exampleArray1: [ "data string", "more Data", "hold on one more" ],
-                                exampleArray2: [ 34, 645, 2354, 58655 ]
-                            }
-
-        let messageToSend = (new Date()).toISOString() + '|*|Platform|*|Data|*|Example|*|' + JSON.stringify(oneObjToSend) + '|*|' + JSON.stringify(twoObjToSend)
-        socketClient.send(messageToSend)
+    
+    function sendMessage(message) {
+        if (socketClient && socketClient.readyState === WEB_SOCKET.OPEN) {
+            socketClient.send(message);
+            SA.logger.info(`[INFO] Sent message: ${message}`);
+        } else {
+            SA.logger.warn('[WARN] WebSocket is not open. Message could not be sent.');
+        }
     }
-}
+    
+};
