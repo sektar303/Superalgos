@@ -16,11 +16,6 @@ exports.newOpenStorageUtilitiesAWSS3Storage = function newOpenStorageUtilitiesAW
     async function saveFile(fileName, filePath, fileContent, storageContainer) {
         /**@type {ApiSecret} */
         const secret = SA.secrets.apisSecrets.map.get(storageContainer.config.codeName)
-        if (secret === undefined) {
-            SA.logger.warn('You need at the Apis Secrets File a record for the codeName = ' + storageContainer.config.codeName)
-            return
-        }
-
         const s3Client = getClient(secret, storageContainer)
         const { PutObjectCommand } = SA.nodeModules.awsS3
         let key = filePath + '/' + fileName + '.json'
@@ -66,12 +61,6 @@ exports.newOpenStorageUtilitiesAWSS3Storage = function newOpenStorageUtilitiesAW
     async function removeFile(fileName, filePath, storageContainer) {       
         /** @type {ApiSecret} */
         const secret = SA.secrets.apisSecrets.map.get(storageContainer.config.codeName);
-        if (secret === undefined) {
-            SA.logger.warn('Secret is undefined');
-            SA.logger.warn(`You need to have a record for codeName = ${storageContainer.config.codeName} in the Apis Secrets File.`);
-            return;
-        }
-
         const s3Client = getClient(secret, storageContainer)
         const { DeleteObjectCommand } = SA.nodeModules.awsS3
         let key = filePath + '/' + fileName + '.json'
@@ -98,7 +87,8 @@ exports.newOpenStorageUtilitiesAWSS3Storage = function newOpenStorageUtilitiesAW
     }
 
     /**
-     * 
+     * This will try and use credentials supplied by the user in the UI otherwise it will
+     * fallback to using AWS credentials lookup by the SDK
      * @param {ApiSecret} secret 
      * @param {StorageContainer} storageContainer 
      * @returns {import {S3Client} from "@aws-sdk/client-s3";}
@@ -106,14 +96,14 @@ exports.newOpenStorageUtilitiesAWSS3Storage = function newOpenStorageUtilitiesAW
     function getClient(secret, storageContainer) {
         if(_client === undefined) {
             const options = {};
-            if(secret.accessKeyId && secret.secretAccessKey) {
-                options.accessKeyId = secret.accessKeyId
-                options.secretAccessKey = secret.secretAccessKey
+            if(secret.access_key_id && secret.secret_access_key) {
+                options.accessKeyId = secret.access_key_id
+                options.secretAccessKey = secret.secret_access_key
             }
             if(secret.region) {
                 options.region = secret.region
             }
-            else if(storageContainer.config.bucketRegion !== undefined && storageContainer.config.bucketRegion.length > 0) {
+            if(storageContainer.config.bucketRegion !== undefined && storageContainer.config.bucketRegion.length > 0) {
                 options.region = storageContainer.config.bucketRegion
             }
             const { S3Client } = SA.nodeModules.awsS3
@@ -137,7 +127,7 @@ exports.newOpenStorageUtilitiesAWSS3Storage = function newOpenStorageUtilitiesAW
 
 /**
  * @typedef ApiSecret
- * @property {string|undefined} accessKeyId
- * @property {string|undefined} secretAccessKey
+ * @property {string|undefined} access_key_id
+ * @property {string|undefined} secret_access_key
  * @property {string|undefined} region
  */
