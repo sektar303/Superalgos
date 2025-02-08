@@ -1,5 +1,5 @@
 {
-    "type": "User Storage",
+    "type": "AWS S3 Storage",
     "menuItems": [
         {
             "action": "Configure",
@@ -11,26 +11,13 @@
         },
         {
             "action": "Add UI Object",
-            "disableIfPropertyIsDefined": true,
-            "propertyToCheckFor": "githubStorage",
             "actionProject": "Visual-Scripting",
             "actionFunction": "payload.executeAction",
-            "label": "Add Github Storage",
-            "translationKey": "add.githubStorage",
-            "relatedUiObject": "Github Storage",
+            "label": "Add AWS S3 Storage Container",
+            "translationKey": "add.awsS3StorageContainer",
+            "relatedUiObject": "AWS S3 Storage Container",
             "relatedUiObjectProject": "Open-Storage"
-        },
-        {
-            "action": "Add UI Object",
-            "disableIfPropertyIsDefined": true,
-            "propertyToCheckFor": "awsS3Storage",
-            "actionProject": "Visual-Scripting",
-            "actionFunction": "payload.executeAction",
-            "label": "Add AWS S3 Storage",
-            "translationKey": "add.awsS3Storage",
-            "relatedUiObject": "AWS S3 Storage",
-            "relatedUiObjectProject": "Open-Storage"
-        },        
+        },      
         {
             "action": "Delete UI Object",
             "actionProject": "Visual-Scripting",
@@ -53,20 +40,14 @@
     "addLeftIcons": true,
     "level": 2,
     "attachingRules": {
-        "compatibleTypes": "->User Profile->"
+        "compatibleTypes": "->User Storage->"
     },
-    "propertyNameAtParent": "userStorage",
+    "propertyNameAtParent": "awsS3Storage",
     "childrenNodesProperties": [
         {
-            "name": "githubStorage",
-            "type": "node",
-            "childType": "Github Storage",
-            "autoAdd": false
-        },
-        {
-            "name": "awsS3Storage",
-            "type": "node",
-            "childType": "AWS S3 Storage",
+            "name": "awsS3StorageContainers",
+            "type": "array",
+            "childType": "AWS S3 Storage Container",
             "autoAdd": false
         }
     ]
