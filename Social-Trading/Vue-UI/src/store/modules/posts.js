@@ -113,7 +113,7 @@ const actions = {
     if (postsResponse === undefined) {
       
       let errorMessage = 'Social Entity sending the Query is unrelated to a User Profile.';
-      console.log('Social Entity sending the Query is unrelated to a User Profile.');
+      console.log(errorMessage);
       //commit('SET_ERROR_MESSAGE', { errorMessage, user });
     }
     
@@ -161,7 +161,7 @@ const actions = {
     if (eventsResponse === undefined) {
       
       let errorMessage = 'Social Entity sending the Query is unrelated to a User Profile.'
-      console.log('Social Entity sending the Query is unrelated to a User Profile.')
+      console.log(errorMessage)
      // commit('SET_ERROR_MESSAGE', { errorMessage, id })
     }
     
