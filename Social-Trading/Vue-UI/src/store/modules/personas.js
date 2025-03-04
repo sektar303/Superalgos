@@ -220,7 +220,6 @@ const getters = {
   socialPersonaProfiles: state => state.socialPersonaProfiles,
   usersSocialPersonas: state => state.usersSocialPersonas,
   otherUsersSocialPersonas: state => state.otherUsersSocialPersonas,
-  selectedSocialPersona: state => state.selectedSocialPersona,
 
   getPersonaStatsById: (state) => (personaId) => {
     const persona = state.socialPersonas[personaId];
