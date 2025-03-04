@@ -113,7 +113,7 @@ const actions = {
     if (postsResponse === undefined) {
       
       let errorMessage = 'Social Entity sending the Query is unrelated to a User Profile.';
-      console.log(errorMessage);
+      console.log(errorMessage, user);
       //commit('SET_ERROR_MESSAGE', { errorMessage, user });
     }
     
