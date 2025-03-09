@@ -182,7 +182,7 @@ const actions = {
         console.log(`FETCHING ALL USERS FOLLOWERS (Attempt ${currentRetry + 1}), message:`, message);
         let followersResponse = await fetchFollowers(message);
         
-        if ( followersResponse.data.data === '[}' || followersResponse.data.data === undefined ) {
+        if ( followersResponse.data.data === '[]' || followersResponse.data.data === undefined ) {
 
           // If data is empty, wait for the specified retryDelay and then retry.
         await new Promise(resolve => setTimeout(resolve, retryDelay));
