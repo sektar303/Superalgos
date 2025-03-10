@@ -54,7 +54,7 @@
 import AppBar from './components/App_Nav_components/AppBar/AppBar.vue'
 import Footer from './components/App_Nav_components/Footer/Footer.vue';
 import SideBar from './components/App_Nav_components/SideBar/SideBarCol.vue';
-import RightSideBar from './components/MainView/RightSideBar/RightSideBar.vue';
+import RightSideBar from './components/App_Nav_components/RightSideBar/RightSideBar.vue';
 import { useRoute } from 'vue-router';
 
 export default {
