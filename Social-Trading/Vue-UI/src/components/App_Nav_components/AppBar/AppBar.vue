@@ -142,7 +142,6 @@ export default {
   data() {    
     return {
       showForm: false,
-      showForm: false,
         fields: [
                 { label: 'Social handle', value: '', name: "handle" },
                 { label: 'GitHub UserName', value: '', name: "githubUsername" },
@@ -189,12 +188,11 @@ export default {
           gitToken,
         }
         //console.log('Card Data', this.newProfile )
-        this.$store.dispatch('socialPersonas/addNewProfile', this.newProfile);
+        this.$store.dispatch('personas/addNewProfile', this.newProfile);
         return { 
           handle,
           githubUsername,
-          gitToken, 
-          handle,
+          gitToken,
           address
         }
 
