@@ -217,7 +217,7 @@ import { toBase64, resizeImage } from "../../utils/formatters.js"
 
     saveEdit() {
       const index = this.socialPersonas.findIndex((sp) => sp.id === this.editedSocialPersona.id);
-      this.$set(this.socialPersonas, index, this.editedSocialPersona);
+      this.socialPersonas[index] = { ...this.editedSocialPersona };
       this.dialogVisible = false;
       this.editedSocialPersona = null;
     },
@@ -381,7 +381,7 @@ import { toBase64, resizeImage } from "../../utils/formatters.js"
           break;
 
         default:
-          return this;
+          return false;
       }
     },
     created() {
