@@ -299,90 +299,91 @@ import { toBase64, resizeImage } from "../../utils/formatters.js"
           this.$toast.error('Failed to process the file. Please try again.');
         }
     }
-  },
-  computed: {
-    valid() {
-      switch (this.title) {
-        case 'Create Profile':
-          if (
-            this.formData.handle !== undefined &&
-            this.formData.bio !== undefined &&
-            this.avatarPreviewUrl !== undefined &&
-            this.coverImgPreviewUrl !== undefined
-          ) {
-            return (
-              this.formData.handle &&
-              this.formData.bio &&
-              this.avatarPreviewUrl &&
-              this.coverImgPreviewUrl
-            );
-          }
-          break;
+    },
+    computed: {
+      valid() {
+        switch (this.title) {
+          case 'Create Profile':
+            if (
+              this.formData.handle !== undefined &&
+              this.formData.bio !== undefined &&
+              this.avatarPreviewUrl !== undefined &&
+              this.coverImgPreviewUrl !== undefined
+            ) {
+              return (
+                this.formData.handle &&
+                this.formData.bio &&
+                this.avatarPreviewUrl &&
+                this.coverImgPreviewUrl
+              );
+            }
+            break;
 
-        case 'new Profile':
-          if (
-            this.formData.handle !== undefined &&
-            this.formData.githubUsername !== undefined &&
-            this.formData.gitToken !== undefined
-          ) {
-            return (
-              this.formData.handle &&
-              this.formData.githubUsername &&
-              this.formData.gitToken
-            );
-          }
-          break;
+          case 'new Profile':
+            if (
+              this.formData.handle !== undefined &&
+              this.formData.githubUsername !== undefined &&
+              this.formData.gitToken !== undefined
+            ) {
+              return (
+                this.formData.handle &&
+                this.formData.githubUsername &&
+                this.formData.gitToken
+              );
+            }
+            break;
           case 'SA User Profile':
-          if (
-            this.formData.githubUsername !== undefined &&
-            this.formData.gitToken !== undefined &&
-            this.formData.address !== undefined &&
-            this.formData.privateKey !== undefined 
-          ) {
-            return (
-              this.formData.githubUsername &&
-              this.formData.gitToken &&
-              this.formData.address &&
-              this.formData.privateKey
-            );
-          }
-          break;
+            if (
+              this.formData.githubUsername !== undefined &&
+              this.formData.gitToken !== undefined &&
+              this.formData.address !== undefined &&
+              this.formData.privateKey !== undefined
+            ) {
+              return (
+                this.formData.githubUsername &&
+                this.formData.gitToken &&
+                this.formData.address &&
+                this.formData.privateKey
+              );
+            }
+            break;
           case 'Create AppId':
-          if (
-            this.formData.githubUsername !== undefined &&
-            this.formData.gitToken !== undefined &&
-            this.formData.address !== undefined &&
-            this.formData.privateKey !== undefined 
-          ) {
-            return (
-              this.formData.githubUsername &&
-              this.formData.gitToken &&
-              this.formData.address &&
-              this.formData.privateKey
-            );
-          }
-          break;
+            if (
+              this.formData.githubUsername !== undefined &&
+              this.formData.gitToken !== undefined &&
+              this.formData.address !== undefined &&
+              this.formData.privateKey !== undefined
+            ) {
+              return (
+                this.formData.githubUsername &&
+                this.formData.gitToken &&
+                this.formData.address &&
+                this.formData.privateKey
+              );
+            }
+            break;
           case 'Social Persona':
-          if (
-            this.formData.handle !== undefined &&
-            this.formData.githubUsername !== undefined &&
-            this.formData.gitToken !== undefined &&
-            this.formData.address !== undefined &&
-            this.formData.privateKey !== undefined 
-          ) {
-            return (
-              this.formData.handle &&
-              this.formData.githubUsername &&
-              this.formData.gitToken &&
-              this.formData.address &&
-              this.formData.privateKey
-            );
-          }
-          break;
+            if (
+              this.formData.handle !== undefined &&
+              this.formData.githubUsername !== undefined &&
+              this.formData.gitToken !== undefined &&
+              this.formData.address !== undefined &&
+              this.formData.privateKey !== undefined
+            ) {
+              return (
+                this.formData.handle &&
+                this.formData.githubUsername &&
+                this.formData.gitToken &&
+                this.formData.address &&
+                this.formData.privateKey
+              );
+            }
+            break;
 
-        default:
-          return false;
-      }
+          default:
+            return false;
+        }
+      },
     },
     created() {
       if(this.coverImgPreviewUrl) {
@@ -392,8 +393,8 @@ import { toBase64, resizeImage } from "../../utils/formatters.js"
         this.avatarPreviewUrl = this.coverImg
       }
     }
-  },
+}
 
-  };
+  
   </script>
   
