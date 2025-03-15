@@ -32,7 +32,6 @@
         </v-card>
         <v-card  >
         <v-card-title>All SA S.Entities</v-card-title>
-        <UsersWithoutProfiles />
       </v-card>
     </v-navigation-drawer>  
   
@@ -46,7 +45,6 @@
         <v-card class="mt-2">
             <V-card-title>Trends for you</V-card-title>
             <v-card-item>
-              <Users />
           <div>
             <div class="text-caption">
              Trending Trades 
@@ -62,23 +60,17 @@
         </v-card>
         <v-card  >
         <v-card-title>All SA S.Entities</v-card-title>
-        <UsersWithoutProfiles />
         </v-card>
     </v-card>    
   </template>
     
     <script>
-    import Users from './TrendForYou/UserToFollow.vue'
     import MyEntites from './MyEntities/MyEntities.vue'
-    import UsersWithoutProfiles from './UsersWithoutProfiles/UsersWithoutProfiles.vue';
     export default {
       name: 'TrendForYOu',
       components: {
-        Users,
         MyEntites,
-        UsersWithoutProfiles
-        
-      },
+         },
       props: {
         open: Boolean,
       },
